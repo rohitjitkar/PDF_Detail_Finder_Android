@@ -3,96 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>PDF Detail Finder</title>
+<title>Electoral Roll Search</title>
 <style>
+:root{
+ --navy:#123b5d;--blue:#1f5f8b;--gold:#c49a45;--cream:#faf8f2;
+ --ink:#172433;--muted:#647383;--line:#d9e0e6;--white:#fff;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#f5f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif}
-header{background:#172033;color:#fff;padding:20px 18px 18px}
-h1{margin:0;font-size:22px}.sub{margin-top:5px;font-size:12px;opacity:.7}
+body{margin:0;background:#f2f5f7;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.hero{background:linear-gradient(145deg,#0e314d,#1e628e);color:white;padding:26px 18px 24px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:180px;height:180px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-60px;top:-65px}
+.brand{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;opacity:.78;margin-bottom:9px}
+.title{font-size:22px;line-height:1.25;font-weight:800;margin:0}
+.subtitle{font-size:14px;font-weight:700;margin-top:7px}
+.final{display:inline-block;margin-top:10px;padding:6px 10px;border:1px solid rgba(255,255,255,.3);border-radius:20px;font-size:11px;letter-spacing:.8px}
 main{max-width:760px;margin:auto;padding:14px}
+.info{background:var(--cream);border:1px solid #e7dfcf;border-radius:15px;padding:15px;margin-bottom:13px}
+.info-title{font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-item{font-size:12px;color:var(--muted);line-height:1.35}
+.info-item b{display:block;color:var(--ink);font-size:13px;margin-top:2px}
+.search-card{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 3px 10px rgba(24,45,62,.06);margin-bottom:13px}
+.search-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.search-sub{font-size:12px;color:var(--muted);margin-bottom:12px}
 .searchbox{display:flex;gap:8px}
-input{flex:1;min-width:0;padding:14px 15px;border:1px solid #d6dbe5;border-radius:12px;font-size:16px;background:#fff}
-button{border:0;border-radius:12px;padding:0 17px;background:#2563eb;color:white;font-weight:700}
-.helper{font-size:12px;color:#697386;margin:9px 2px 14px}
+input{flex:1;min-width:0;padding:14px;border:1px solid #cbd5df;border-radius:11px;font-size:16px;outline:none}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,95,139,.1)}
+button{border:0;border-radius:11px;background:var(--navy);color:#fff;padding:0 18px;font-weight:800;font-size:14px}
+.examples{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.example{border:1px solid #d8e0e7;background:#f7f9fb;color:var(--blue);padding:7px 9px;border-radius:20px;font-size:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.stat{background:white;border:1px solid var(--line);border-radius:13px;padding:13px}
+.stat-num{font-size:21px;font-weight:800;color:var(--navy)}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:3px}
 .summary{font-size:13px;color:#596579;margin:12px 2px}
-.card{background:white;border:1px solid #e2e6ee;border-radius:15px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
-.name{font-size:19px;font-weight:700;margin-bottom:6px;text-transform:capitalize}
-.meta{font-size:12px;color:#697386;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
-.label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#8992a3;margin-bottom:3px}
-.value{font-size:14px;line-height:1.3;color:#263246}
+.result{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:11px}
+.name{font-size:19px;font-weight:800;margin-bottom:5px;text-transform:capitalize}
+.meta{font-size:11px;color:var(--muted);margin-bottom:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 16px}
+.label{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#8994a1;margin-bottom:3px}
+.value{font-size:13px;line-height:1.35}
 .full{grid-column:1/-1}
-.epic{font-family:monospace;font-weight:700;letter-spacing:.3px}
-.open{display:inline-block;margin-top:13px;padding:9px 12px;border-radius:9px;background:#eef4ff;color:#205bc8;font-size:12px;font-weight:700;text-decoration:none}
-.empty{background:white;border:1px dashed #cbd2df;border-radius:14px;padding:28px 16px;text-align:center;color:#687386}
+.epic{font-family:monospace;font-weight:800}
+.open{display:inline-block;margin-top:14px;padding:9px 12px;border-radius:9px;background:#edf4f9;color:var(--blue);font-size:11px;font-weight:800;text-decoration:none}
+.empty{background:white;border:1px dashed #cbd5df;border-radius:14px;padding:28px 16px;text-align:center;color:#687386}
+.footer{text-align:center;color:#8a96a3;font-size:10px;padding:18px 5px 28px}
+@media(max-width:430px){.title{font-size:20px}.searchbox{display:grid;grid-template-columns:1fr auto}.searchbox button{padding:0 15px}.stats{gap:7px}.stat{padding:11px}.stat-num{font-size:18px}}
 </style>
 </head>
 <body>
-<header>
-  <h1>PDF Detail Finder</h1>
-  <div class="sub">Search 783 indexed voter records offline</div>
+
+<header class="hero">
+  <div class="brand">Maharashtra State Legislative Council Electoral Roll - 2026</div>
+  <h1 class="title">PUNE Division Teachers' Constituency</h1>
+  <div class="subtitle">Final Voter List</div>
+  <div class="final">PART 5 • PUNE</div>
 </header>
+
 <main>
-  <div class="card">
-    <div class="searchbox">
-      <input id="q" placeholder="Search name, EPIC, school, address..." autocomplete="off">
-      <button onclick="searchRecords()">Search</button>
+  <section class="info">
+    <div class="info-title">Roll Information</div>
+    <div class="info-grid">
+      <div class="info-item">District<b>PUNE</b></div>
+      <div class="info-item">Part<b>5</b></div>
+      <div class="info-item">Qualify Date<b>01-11-2025</b></div>
+      <div class="info-item">Publication Date<b>12-01-2026</b></div>
+      <div class="info-item" style="grid-column:1/-1">Electoral Roll prepared till<b>18-12-2025, as per received claims and objections</b></div>
     </div>
-    <div class="helper">Try: Reshma · Bhosale · XUA7363955 · Someshwar</div>
-  </div>
-  <div id="summary" class="summary"></div>
-  <div id="results"></div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-num">782</div><div class="stat-label">Indexed Records</div></div>
+    <div class="stat"><div class="stat-num">112</div><div class="stat-label">PDF Pages</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Data Fields</div></div>
+  </section>
+
+  <section class="search-card">
+    <div class="search-title">Search Voter Records</div>
+    <div class="search-sub">Search by elector name, relative, address, institute, age, gender or EPIC number.</div>
+    <div class="searchbox">
+      <input id="q" placeholder="e.g. Reshma" autocomplete="off">
+      <button onclick="searchRecords()">SEARCH</button>
+    </div>
+    <div class="examples">
+      <span class="example" onclick="quick('Reshma')">Reshma</span>
+      <span class="example" onclick="quick('Bhosale')">Bhosale</span>
+      <span class="example" onclick="quick('XUA7363955')">EPIC</span>
+      <span class="example" onclick="quick('Someshwar')">Someshwar</span>
+    </div>
+  </section>
+
+  <div id="summary" class="summary">Enter a search term to find a record.</div>
+  <div id="results"><div class="empty">Your search results will appear here as simple individual records.</div></div>
+
+  <div class="footer">Offline search • Data indexed from the bundled PDF • Part 5</div>
 </main>
 
+<script src="records.js"></script>
 <script>
-let records=[];
-fetch("records.json").then(r=>r.json()).then(x=>{
-  records=x;
-  document.getElementById("summary").textContent=records.length+" records ready";
-}).catch(()=>{
-  document.getElementById("summary").textContent="Could not load local record database.";
-});
-
-function esc(s){
- return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function norm(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim();}
+const records=window.PDF_RECORDS||[];
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function norm(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim()}
+function quick(v){document.getElementById("q").value=v;searchRecords()}
 function searchRecords(){
- const q=norm(document.getElementById("q").value);
- const results=document.getElementById("results");
- if(!q){
-   document.getElementById("summary").textContent=records.length+" records ready";
-   results.innerHTML='<div class="empty">Type a name, EPIC number, institute or address to search.</div>';
-   return;
- }
+ const q=norm(document.getElementById("q").value), results=document.getElementById("results");
+ if(!q){document.getElementById("summary").textContent="Enter a search term to find a record.";results.innerHTML='<div class="empty">Your search results will appear here as simple individual records.</div>';return}
  const terms=q.split(/\s+/).filter(Boolean);
- const fields=["name","relative","address","institute","age","gender","epic"];
- const matches=records.map(r=>{
-   const blob=norm(fields.map(k=>r[k]).join(" "));
-   const hits=terms.filter(t=>blob.includes(t)).length;
-   return {r,hits};
- }).filter(x=>x.hits===terms.length)
-   .sort((a,b)=>norm(a.r.name).localeCompare(norm(b.r.name))||a.r.sr_no-b.r.sr_no)
-   .map(x=>x.r);
-
+ const fields=["name","relative","address","institute","age","gender","epic","sr_no"];
+ const matches=records.filter(r=>{const blob=norm(fields.map(k=>r[k]).join(" "));return terms.every(t=>blob.includes(t))}).sort((a,b)=>a.sr_no-b.sr_no);
  document.getElementById("summary").textContent=matches.length+" matching record"+(matches.length===1?"":"s");
- if(!matches.length){
-   results.innerHTML='<div class="empty">No matching record found.<br><br>Try a shorter search such as <b>Reshma</b> or an EPIC number.</div>';
-   return;
- }
+ if(!matches.length){results.innerHTML='<div class="empty">No matching record found.<br><br>Try a shorter search such as <b>Reshma</b>.</div>';return}
  results.innerHTML=matches.slice(0,100).map(r=>`
-  <div class="card">
-   <div class="name">${esc(r.name)}</div>
-   <div class="meta">Sr. No. ${esc(r.sr_no)} &nbsp;•&nbsp; Page ${esc(r.page)}</div>
-   <div class="grid">
-    <div><div class="label">Age / Gender</div><div class="value">${esc(r.age)} / ${esc(r.gender)}</div></div>
-    ${r.epic?`<div><div class="label">EPIC No.</div><div class="value epic">${esc(r.epic)}</div></div>`:""}
-    <div class="full"><div class="label">Relative</div><div class="value">${esc(r.relative)}</div></div>
-    <div class="full"><div class="label">Institute</div><div class="value">${esc(r.institute)}</div></div>
-    <div class="full"><div class="label">Address</div><div class="value">${esc(r.address)}</div></div>
-   </div>
-   <a class="open" href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}">VIEW PDF PAGE ${r.page}</a>
-  </div>`).join("");
+ <article class="result">
+  <div class="name">${esc(r.name)}</div>
+  <div class="meta">Serial No. ${esc(r.sr_no)} &nbsp;•&nbsp; Source Page ${esc(r.page)}</div>
+  <div class="grid">
+   <div><div class="label">Age / Gender</div><div class="value">${esc(r.age)} / ${esc(r.gender)}</div></div>
+   ${r.epic?`<div><div class="label">EPIC No.</div><div class="value epic">${esc(r.epic)}</div></div>`:""}
+   <div class="full"><div class="label">Relative Name</div><div class="value">${esc(r.relative)}</div></div>
+   <div class="full"><div class="label">Institute</div><div class="value">${esc(r.institute)}</div></div>
+   <div class="full"><div class="label">Address</div><div class="value">${esc(r.address)}</div></div>
+  </div>
+  <a class="open" href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}">VIEW SOURCE PAGE ${r.page}</a>
+ </article>`).join("");
 }
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")searchRecords()});
 </script>

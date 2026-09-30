@@ -105,6 +105,13 @@ const records=window.PDF_RECORDS||[];
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function norm(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim()}
 function quick(v){document.getElementById("q").value=v;searchRecords()}
+function openSource(page){
+  if(window.AndroidPDF && AndroidPDF.openPdf){
+    AndroidPDF.openPdf(Number(page));
+  }else{
+    alert("Open this result from the Android app.");
+  }
+}
 function searchRecords(){
  const q=norm(document.getElementById("q").value), results=document.getElementById("results");
  if(!q){document.getElementById("summary").textContent="Enter a search term to find a record.";results.innerHTML='<div class="empty">Your search results will appear here as simple individual records.</div>';return}
@@ -124,7 +131,7 @@ function searchRecords(){
    <div class="full"><div class="label">Institute</div><div class="value">${esc(r.institute)}</div></div>
    <div class="full"><div class="label">Address</div><div class="value">${esc(r.address)}</div></div>
   </div>
-  <a class="open" href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}">VIEW SOURCE PAGE ${r.page}</a>
+  <a class="open" href="javascript:void(0)" onclick="openSource(${r.page})">VIEW SOURCE PDF • PAGE ${r.page}</a>
  </article>`).join("");
 }
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")searchRecords()});

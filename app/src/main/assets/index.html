@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PDF Detail Finder</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6fa;color:#111827}
+header{padding:22px 18px;background:#111827;color:white}
+h1{font-size:22px;margin:0 0 5px}.sub{font-size:13px;opacity:.72}
+main{padding:18px;max-width:760px;margin:auto}
+.search{display:flex;gap:8px;margin-bottom:12px}.search input{flex:1;padding:15px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;outline:none}
+button{border:0;border-radius:12px;padding:14px 16px;background:#2563eb;color:#fff;font-weight:bold}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:16px;margin:12px 0}
+.hint{font-size:13px;color:#6b7280}.result{padding:14px 0;border-top:1px solid #eee}.result:first-child{border-top:0}
+.badge{display:inline-block;background:#eef2ff;color:#3730a3;padding:5px 8px;border-radius:999px;font-size:12px}
+.snip{background:#f8fafc;padding:11px;border-radius:10px;white-space:pre-wrap;font-size:13px;line-height:1.45;margin-top:8px}
+a{color:#2563eb;text-decoration:none;font-weight:bold}.count{font-size:13px;color:#6b7280}
+</style>
+</head>
+<body>
+<header><h1>PDF Detail Finder</h1><div class="sub">Search indexed PDF records on your device</div></header>
+<main>
+<div class="card">
+<div class="search"><input id="q" placeholder="Name, EPIC, institute, address..."><button onclick="search()">Search</button></div>
+<div class="hint">Examples: Amit Shivaji Awale · XUA7363955 · Bhosale · Tuljaram Chaturchand</div>
+</div>
+<div id="out"></div>
+</main>
+<script>
+let pages=[];
+fetch('pages.json').then(r=>r.json()).then(x=>pages=x);
+
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function tokens(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(x=>x.length>1)}
+function snippet(t,q){
+ let clean=t.replace(/\s+/g,' ').trim(), low=clean.toLowerCase(), ts=tokens(q);
+ let pos=0; for(const x of ts){let p=low.indexOf(x); if(p>=0){pos=p;break}}
+ let st=Math.max(0,pos-170), en=Math.min(clean.length,pos+650);
+ return (st?'…':'')+clean.slice(st,en)+(en<clean.length?'…':'');
+}
+function search(){
+ const q=document.getElementById('q').value.trim();
+ const out=document.getElementById('out');
+ if(!q){out.innerHTML='<div class="card">Enter something to search.</div>';return}
+ const ts=tokens(q);
+ const scored=pages.map(p=>{
+   const low=p.text.toLowerCase();
+   let score=0; for(const t of ts){if(low.includes(t)) score++}
+   return {...p,score};
+ }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.page-b.page).slice(0,50);
+ out.innerHTML='<div class="card"><b>Results</b><div class="count">'+scored.length+' matching page(s)</div>'+
+   scored.map(r=>`<div class="result"><span class="badge">Page ${r.page}</span><div class="snip">${esc(snippet(r.text,q))}</div><p><a href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}" target="_blank">Open source PDF →</a></p></div>`).join('')+
+   '</div>';
+}
+document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+</script>
+</body>
+</html>

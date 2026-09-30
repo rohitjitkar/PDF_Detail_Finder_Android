@@ -1,11 +1,20 @@
 # PDF Detail Finder – Android
 
-Offline searchable PDF record app.
+Professional offline search app for the bundled electoral-roll PDF.
 
-### Source PDF button
-The **VIEW SOURCE PDF** button now uses Android's PDF sharing/opening mechanism (FileProvider + ACTION_VIEW) instead of a `file://` link. The PDF is copied from the app assets to the app cache and opened by an installed PDF viewer.
+This version includes:
+- Structured local record database
+- Professional home page based on the PDF headings
+- Search across voter fields
+- Android FileProvider support for opening the source PDF
+- GitHub Actions APK build
 
-If the phone has no PDF viewer, Android will show a message.
+## Build online
+1. Upload/replace the project files in GitHub.
+2. Open **Actions**.
+3. Select **Build APK**.
+4. Click **Run workflow**.
+5. Wait for the green check.
+6. Download **PDF-Detail-Finder-APK** under Artifacts.
 
-Build:
-GitHub Actions → Build APK → Run workflow → download PDF-Detail-Finder-APK.
+The source-PDF fix requires the AndroidX Core dependency included in `app/build.gradle`.

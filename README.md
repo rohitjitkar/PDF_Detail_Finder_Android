@@ -1,17 +1,16 @@
 # PDF Detail Finder – Android
 
-Offline Android app for searching the bundled electoral-roll PDF.
+Offline Android search app for the bundled electoral-roll PDF.
 
-## Important fix
-The app now bundles the extracted page index as `app/src/main/assets/pages.js` instead of loading `pages.json` with `fetch()`. This avoids Android WebView local-file loading/CORS problems that could cause every search to return 0 results.
+The app now uses a structured local database of individual records:
+Name, Relative, Address, Institute, Age, Gender, EPIC No. and Source Page.
 
-Example searchable names include `Reshma`, `Amit Shivaji Awale`, EPIC numbers, institutes and addresses.
+It is designed as simple record cards rather than displaying large blocks of PDF text.
 
-## Build online
-Push this project to GitHub. The included `.github/workflows/build-apk.yml` builds a debug APK with GitHub Actions.
+## Build online with GitHub Actions
+1. Upload this project to GitHub.
+2. Open **Actions**.
+3. Select **Build APK**.
+4. Click **Run workflow**.
+5. After success, download **PDF-Detail-Finder-APK** from Artifacts.
 
-In GitHub:
-1. Open **Actions**
-2. Select **Build APK**
-3. Click **Run workflow**
-4. After success, download **PDF-Detail-Finder-APK** from Artifacts.

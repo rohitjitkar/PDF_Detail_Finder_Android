@@ -5,56 +5,96 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>PDF Detail Finder</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6fa;color:#111827}
-header{padding:22px 18px;background:#111827;color:white}
-h1{font-size:22px;margin:0 0 5px}.sub{font-size:13px;opacity:.72}
-main{padding:18px;max-width:760px;margin:auto}
-.search{display:flex;gap:8px;margin-bottom:12px}.search input{flex:1;padding:15px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;outline:none}
-button{border:0;border-radius:12px;padding:14px 16px;background:#2563eb;color:#fff;font-weight:bold}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:16px;margin:12px 0}
-.hint{font-size:13px;color:#6b7280}.result{padding:14px 0;border-top:1px solid #eee}.result:first-child{border-top:0}
-.badge{display:inline-block;background:#eef2ff;color:#3730a3;padding:5px 8px;border-radius:999px;font-size:12px}
-.snip{background:#f8fafc;padding:11px;border-radius:10px;white-space:pre-wrap;font-size:13px;line-height:1.45;margin-top:8px}
-a{color:#2563eb;text-decoration:none;font-weight:bold}.count{font-size:13px;color:#6b7280}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif}
+header{background:#172033;color:#fff;padding:20px 18px 18px}
+h1{margin:0;font-size:22px}.sub{margin-top:5px;font-size:12px;opacity:.7}
+main{max-width:760px;margin:auto;padding:14px}
+.searchbox{display:flex;gap:8px}
+input{flex:1;min-width:0;padding:14px 15px;border:1px solid #d6dbe5;border-radius:12px;font-size:16px;background:#fff}
+button{border:0;border-radius:12px;padding:0 17px;background:#2563eb;color:white;font-weight:700}
+.helper{font-size:12px;color:#697386;margin:9px 2px 14px}
+.summary{font-size:13px;color:#596579;margin:12px 2px}
+.card{background:white;border:1px solid #e2e6ee;border-radius:15px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+.name{font-size:19px;font-weight:700;margin-bottom:6px;text-transform:capitalize}
+.meta{font-size:12px;color:#697386;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#8992a3;margin-bottom:3px}
+.value{font-size:14px;line-height:1.3;color:#263246}
+.full{grid-column:1/-1}
+.epic{font-family:monospace;font-weight:700;letter-spacing:.3px}
+.open{display:inline-block;margin-top:13px;padding:9px 12px;border-radius:9px;background:#eef4ff;color:#205bc8;font-size:12px;font-weight:700;text-decoration:none}
+.empty{background:white;border:1px dashed #cbd2df;border-radius:14px;padding:28px 16px;text-align:center;color:#687386}
 </style>
 </head>
 <body>
-<header><h1>PDF Detail Finder</h1><div class="sub">Search indexed PDF records on your device</div></header>
+<header>
+  <h1>PDF Detail Finder</h1>
+  <div class="sub">Search 783 indexed voter records offline</div>
+</header>
 <main>
-<div class="card">
-<div class="search"><input id="q" placeholder="Name, EPIC, institute, address..."><button onclick="search()">Search</button></div>
-<div class="hint">Examples: Reshma · Amit Shivaji Awale · XUA7363955 · Bhosale · Tuljaram Chaturchand</div>
-</div>
-<div id="out"></div>
+  <div class="card">
+    <div class="searchbox">
+      <input id="q" placeholder="Search name, EPIC, school, address..." autocomplete="off">
+      <button onclick="searchRecords()">Search</button>
+    </div>
+    <div class="helper">Try: Reshma · Bhosale · XUA7363955 · Someshwar</div>
+  </div>
+  <div id="summary" class="summary"></div>
+  <div id="results"></div>
 </main>
 
-<script src="pages.js"></script>
 <script>
-const pages = window.PDF_PAGES || [];
+let records=[];
+fetch("records.json").then(r=>r.json()).then(x=>{
+  records=x;
+  document.getElementById("summary").textContent=records.length+" records ready";
+}).catch(()=>{
+  document.getElementById("summary").textContent="Could not load local record database.";
+});
 
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function tokens(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(x=>x.length>1)}
-function snippet(t,q){
- let clean=t.replace(/\s+/g,' ').trim(), low=clean.toLowerCase(), ts=tokens(q);
- let pos=0; for(const x of ts){let p=low.indexOf(x); if(p>=0){pos=p;break}}
- let st=Math.max(0,pos-170), en=Math.min(clean.length,pos+650);
- return (st?'…':'')+clean.slice(st,en)+(en<clean.length?'…':'');
+function esc(s){
+ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-function search(){
- const q=document.getElementById('q').value.trim();
- const out=document.getElementById('out');
- if(!q){out.innerHTML='<div class="card">Enter something to search.</div>';return}
- const ts=tokens(q);
- const scored=pages.map(p=>{
-   const low=String(p.text||'').toLowerCase();
-   let score=0; for(const t of ts){if(low.includes(t)) score++}
-   return {...p,score};
- }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.page-b.page).slice(0,50);
- out.innerHTML='<div class="card"><b>Results</b><div class="count">'+scored.length+' matching page(s)</div>'+
-   scored.map(r=>`<div class="result"><span class="badge">Page ${r.page}</span><div class="snip">${esc(snippet(r.text,q))}</div><p><a href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}" target="_blank">Open source PDF →</a></p></div>`).join('')+
-   '</div>';
+function norm(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim();}
+function searchRecords(){
+ const q=norm(document.getElementById("q").value);
+ const results=document.getElementById("results");
+ if(!q){
+   document.getElementById("summary").textContent=records.length+" records ready";
+   results.innerHTML='<div class="empty">Type a name, EPIC number, institute or address to search.</div>';
+   return;
+ }
+ const terms=q.split(/\s+/).filter(Boolean);
+ const fields=["name","relative","address","institute","age","gender","epic"];
+ const matches=records.map(r=>{
+   const blob=norm(fields.map(k=>r[k]).join(" "));
+   const hits=terms.filter(t=>blob.includes(t)).length;
+   return {r,hits};
+ }).filter(x=>x.hits===terms.length)
+   .sort((a,b)=>norm(a.r.name).localeCompare(norm(b.r.name))||a.r.sr_no-b.r.sr_no)
+   .map(x=>x.r);
+
+ document.getElementById("summary").textContent=matches.length+" matching record"+(matches.length===1?"":"s");
+ if(!matches.length){
+   results.innerHTML='<div class="empty">No matching record found.<br><br>Try a shorter search such as <b>Reshma</b> or an EPIC number.</div>';
+   return;
+ }
+ results.innerHTML=matches.slice(0,100).map(r=>`
+  <div class="card">
+   <div class="name">${esc(r.name)}</div>
+   <div class="meta">Sr. No. ${esc(r.sr_no)} &nbsp;•&nbsp; Page ${esc(r.page)}</div>
+   <div class="grid">
+    <div><div class="label">Age / Gender</div><div class="value">${esc(r.age)} / ${esc(r.gender)}</div></div>
+    ${r.epic?`<div><div class="label">EPIC No.</div><div class="value epic">${esc(r.epic)}</div></div>`:""}
+    <div class="full"><div class="label">Relative</div><div class="value">${esc(r.relative)}</div></div>
+    <div class="full"><div class="label">Institute</div><div class="value">${esc(r.institute)}</div></div>
+    <div class="full"><div class="label">Address</div><div class="value">${esc(r.address)}</div></div>
+   </div>
+   <a class="open" href="file:///android_asset/TAC3_DIST490_PART5_EN.pdf#page=${r.page}">VIEW PDF PAGE ${r.page}</a>
+  </div>`).join("");
 }
-document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")searchRecords()});
 </script>
 </body>
 </html>
